@@ -3,6 +3,8 @@
 #include <locale.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
+
 
 // Definição da estrutura para representar um território
 struct Territorio {
@@ -25,7 +27,7 @@ void realizarBatalha(struct Territorio *atacante, struct Territorio *defensor) {
     printf("Defesa tirou: %d\n", dadoDefesa);
 
     if (dadoAtaque > dadoDefesa) {
-        printf("ATAQUE VENCEU! %ss cede 1 tropa para %s", defensor->nome, atacante->nome);
+        printf("ATAQUE VENCEU! %s cede 1 tropa para %s", defensor->nome, atacante->nome);
         defensor->tropas--;//Perdedor perde 1 tropa
         atacante->tropas++;//Ganhador ganha 1 tropa
     } else{
@@ -34,6 +36,66 @@ void realizarBatalha(struct Territorio *atacante, struct Territorio *defensor) {
         defensor->tropas++;//Ganhador (defesa) ganha 1
     }
     
+}
+
+// Uma função para modo desafio que recebe vetor de territorios
+void modoDesafio(struct Territorio territorios[]){
+    printf("\n=====================================\n");
+    printf("Modo Desafio: Um Contra Todos!\n");
+    printf("\n=====================================\n");
+
+    int alvo = rand() % 5; //Sortear entre os 5 territórios cadastrados
+
+    printf("\n O território [%s] foi sorteado para ser o alvo!\n", territorios[alvo].nome);
+    printf("Ele deverá se defender dos ataques dos demais territórios.\n");
+
+    int continuar = 1;
+    int opAtaque;
+
+    while (continuar == 1 && territorios[alvo].tropas > 0){
+        printf("\n=====================================\n");
+        printf("\n Alvo atual: %s (Tropas restantes: %d)\n", territorios[alvo].nome, territorios[alvo].tropas);
+        printf("\n=====================================\n");
+
+        printf("Escolha quem irá atacar o alvo:\n");
+
+        //Mostra as opções disponíveis para taque excluindo o território sorteado para alvo
+        for (int i = 0; i < 5; i++){
+            if (i != alvo){
+                printf("[%d] %s (%d tropas)\n", i + 1, territorios[i].nome, territorios[i].tropas);
+
+            }
+        }
+    
+
+        printf("\nDigite o número de quem irá atacar (digite 0 para fugir do desafio): ");
+        scanf("%d", &opAtaque);
+
+        sleep(2);
+
+        if (opAtaque == 0){
+            printf("\nVocê encerrou o Modo Desafio.\n");
+            break; // Sai do laço wile
+        }
+
+        if (opAtaque < 1 || opAtaque > 5){
+            printf("Opção inválida. Escolha um número da lista.\n");
+            continue;
+        }
+
+        if ((opAtaque - 1) == alvo){
+            printf("O alvo não pode atacar a si mesmo.\n");
+            continue; //Exclui o alvo como escolha de ataque
+        }
+
+        realizarBatalha(&territorios[opAtaque - 1], &territorios[alvo]);
+
+        if (territorios[alvo].tropas==0){
+            printf("\nDesafio concluido! O território %s perdeu todas as tropas.", territorios[alvo].nome);
+            break;
+        }
+
+    }
 }
 
 int main() {
@@ -66,6 +128,8 @@ int main() {
         printf("Tropas: %d\n", territorios[i].tropas);
         printf("=========================================\n");
     };
+
+    modoDesafio(territorios);
 int continuar = 1;
 int opAtaque, opDefesa;
 
